@@ -1,0 +1,30 @@
+\documentclass[a4paper, 14pt]{extarticle}
+
+\input{parts/setup}  
+
+\begin{document}
+<<echo=FALSE, warning=FALSE, message=FALSE, include=FALSE>>=
+library("knitr")
+Sys.setlocale(locale = "C")
+opts_chunk$set(message=FALSE, warning=FALSE,
+                strip.white = FALSE, 
+                self.contained=FALSE,
+                tidy.opts=list(width.cutoff=60),
+                dev = "cairo_pdf", 
+                fig.align = "center", 
+                fig.height=5, 
+                fig.width=7)
+#pdf.options(encoding = 'UTF8')
+Sys.setlocale("LC_CTYPE", "russian")
+knit_theme$set("moe")
+
+
+
+@
+
+%\input{parts/title}
+
+<<test, child='parts/Data.Rnw'>>=
+@
+
+\end{document}

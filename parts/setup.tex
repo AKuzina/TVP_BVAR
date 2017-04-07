@@ -1,0 +1,97 @@
+\usepackage{etex}                % расширение классического tex
+\usepackage{cmap}                % для поиска русских слов в pdf
+\usepackage{verbatim}            % для многострочных комментариев
+\usepackage{makeidx}             % для создания предметных указателей
+
+%%% Кодировки и шрифты %%%
+\usepackage{polyglossia}
+
+\setmainlanguage[babelshorthands=true]{russian}
+\setotherlanguages{english}
+
+\setmainfont{Cambria}             % or Helvetica, Arial, Cambria
+\setmonofont{Courier New}
+\newfontfamily{\cyrillicfonttt}{Courier New}
+% why do we need \newfontfamily:
+% http://tex.stackexchange.com/questions/91507/
+
+\defaultfontfeatures{Ligatures=TeX,Mapping=tex-text}
+
+
+\IfFileExists{pscyr.sty}{\usepackage{pscyr}}{}  % Красивые русские шрифты
+
+
+%% Библиография
+
+%% Внимание! При использовании bibtex8 необходимо удалить все
+%% цитирования из  ../common/characteristic.tex
+\newcounter{bibliosel}
+\setcounter{bibliosel}{1}           % 0 --- встроенная реализация с загрузкой файла через движок bibtex8; 1 --- реализация пакетом biblatex через движок biber
+
+%%% Поля и разметка страницы %%%
+
+\usepackage{pdflscape}             % Для включения альбомных страниц
+\usepackage{geometry}              % Для последующего задания полей
+\geometry{a4paper,top=2cm,bottom=2cm,left=2.5cm,right=1cm,nomarginpar}
+
+\usepackage{indentfirst}           % Красная строка
+\setlength{\parindent}{2em}
+\setlength{\topsep}{0pt}
+
+\usepackage{setspace}              % Межстрочный интервал
+\setstretch{1.5}                   
+
+\flushbottom                       % Эта команда заставляет LaTeX чуть растягивать строки, чтобы получить идеально прямоугольную страницу
+\righthyphenmin=2                  % Разрешение переноса двух и более символов
+\pagestyle{plain}                  % Нумерация страниц снизу по центру.
+\widowpenalty=50000               % одна строка абзаца на этой странице, остальное --- на следующей
+\clubpenalty=50000                % одинокая строка в начале страницы
+
+%%% Математические пакеты %%%
+\usepackage{amsthm,amsfonts,amsmath}
+\usepackage{amssymb,amscd}        % Математические дополнения от AMS
+\usepackage{mathtools}            % Добавляет окружение multlined
+
+
+
+
+
+%%% Окружение для нормального центрирования %%%
+\newenvironment{center*}{%
+  \setlength\topsep{0pt}
+  \setlength\parskip{0pt}
+  \begin{center}
+}{
+  \end{center}
+}
+
+
+%%% Таблицы %%%
+\usepackage{longtable}             % Длинные таблицы
+\usepackage{multirow,makecell}     % Улучшенное форматирование таблиц
+\usepackage{array,multicol,bigstrut}
+\usepackage{tabularx}      % таблички растягиавать
+\usepackage{tabulary}
+\usepackage{booktabs}
+
+
+%%% Гиперссылки %%%
+\usepackage[unicode,colorlinks=true,urlcolor=blue,hyperindex,breaklinks]{hyperref}
+
+%%% Списки %%%
+\usepackage{enumitem}
+
+%%% Подписи %%%
+\usepackage{caption}                % Для управления подписями
+\usepackage{subcaption}             % Работа с подрисунками и подобным
+\usepackage{totpages}               % Счётчик страниц
+
+
+%%% Для добавления Стр. над номерами страниц в оглавлении
+%%% http://tex.stackexchange.com/a/306950
+\usepackage{afterpage}
+
+%%% Переопределение именований, чтобы можно было и в преамбуле использовать %%%
+% \renewcommand{\chaptername}{Глава}
+% \renewcommand{\appendixname}{Приложение}
+% \newcommand{\fullbibtitle}{Список литературы}
