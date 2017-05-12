@@ -1,0 +1,172 @@
+% !Rnw root = Main.Rnw
+\subsection{Результаты} \label{sec:results}
+В общей сложности было оценено 159 моделей. Для макроэкономических данных было построено по 4 одномерные модели для каждого из 9 рядов, а также 10 моделей TVP-BVAR, описанных в таблице \ref{table:macro.tvp}. Для сравнения прогнозов на разных горизонтах была рассчитана относительная ошибка прогноза на 3, 6, 12 и 24 периода вперед. Для финансовых рядов было оценено 96 одномерных моделей, 4 модели на каждый из 24 временных рядов, а также 8 моделей байесовской векторной авторегрессии, отдельно для каждой индустрии. Так как финансовые данные содержат ежедневные наблюдения, то горизонты прогноза, для которых рассчитывалась относительная ошибка равнялись 7, 14, 30, 60 и 260 наблюдениям. 
+\subsubsection{Результаты прогнозирования макроэкономических данных}
+На рисунке \ref{fig:macro.error.graph} представлена динамика ошибок прогноза всех макроэкономических переменных для разных горизонтов. Заметим, что каждая из переменных участвовала в двух <<больших>> моделях TVP-BVAR (то есть содержащих более 4 переменных) и, как минимум, в двух <<маленьких>> (содержащих 4 и менее переменных). На графике представлены относительные ошибки только двух моделей: лучшей из двух <<больших>> моделей и лучшей из двух или трех <<маленьких>>. Критерием выбора служила средняя ошибка по 4 горизонтам.
+<<load results,echo = FALSE>>=
+load("error.RData")
+@
+<<macro error pregraph, echo=FALSE>>=
+h.macro <- c(3, 6, 12, 24)
+all.error.macro <- data.frame(matrix(rep(NA, 4), ncol=4))
+colnames(all.error.macro) <- c('horison', 'var', 'model', 'value')
+all.error.macro <- all.error.macro[-1,]
+for (i in 1:9){
+  temp <- macro.error[[i]][,1:4]
+  temp$Big.TVP <- macro.error[[i]][,(4+which.min(colMeans(macro.error[[i]][,5:6])))]
+  temp$Small.TVP <- macro.error[[i]][,(6+which.min(colMeans(macro.error[[i]][,7:ncol(macro.error[[i]])])))]
+  temp$horison <- h.macro
+  temp$var <- rep(m.names[i], 4)
+  temp <- melt(temp, id.vars = c('horison', 'var'), variable.name = "model")
+  all.error.macro <- rbind(all.error.macro, temp)
+}
+@
+<<macro.error.graph, echo=FALSE, fig.height=8, fig.width=12, fig.cap='Относительные ошибки прогноза для макроэкономических данных', fig.lp='fig:', fig.pos = 'h'>>=
+ggplot(all.error.macro, aes(x = horison, y = value, group = model, color = model)) + 
+     geom_point(size = 2.5) + 
+     geom_line()+
+     facet_wrap( ~ var, scales = 'free_y', ncol = 3)+
+     ylab("Ошибка относительно случаного блуждания")+
+     xlab("Горизонт прогноза")+
+     theme(text = element_text(size=22))+
+     scale_color_discrete(breaks=c("e", "a", "f", "hybrid", "Big.TVP", "Small.TVP"),
+                         labels=c("ETS", "ARIMA", "Theta", "Hybrid", "TVP-B", "TVP-S"))
+@
+На графиках видно, что TVP-BVAR оказался наиболее эффективным при прогнозировании цены на нефть и курса доллара к рублю. Причем, если в первом случае хорошие результаты по сравнению с другими моделями показала только модель с большим количеством переменных, то курс доллара одинаково хорошо был предсказан обеими спецификациями. Заметим, что не наблюдается значительного преимущества использования гибридного прогноза по сравнению с обычными одномерными моделями. 
+
+График дает общее представление о том, как соотносятся ошибки прогнозов различных моделей. Поэтому, чтобы более формально сравнить модели между собой, рассмотрим таблицу \ref{tab:macro.res}. В ней представлены модели, которые имеют наименьшую относительную ошибку для данной переменной и горизонта прогноза. Не сложно заметить, что среди всех одномерных моделей явным лидером стала ARIMA. Гибридные прогнозы показали высокий результат только для номинальной заработной платы. В то время как модели TVP-BVAR предоставили лучший прогноз ровно в половине случаев. Также заметим, что при прогнозировании на длительный период времени, <<лучшими>> чаще оказываются одномерные модели. 
+<<best models macro,echo = FALSE>>=
+
+macro.results <- data.frame(matrix(rep(NA, length(h.macro)*ncol(macro)), nrow = ncol(macro), ncol = length(h.macro)))
+rownames(macro.results) <- m.names
+colnames(macro.results) <- paste("h =", h.macro)
+
+for (i in 1:ncol(macro)){
+  model.names <- c('ETS','ARIMA', 'Theta' ,'Hybrid')
+  model.names <- append(model.names,colnames(macro.error[[i]])[-(1:4)])
+  for (h in 1:length(h.macro)){
+    best.num <- which.min(macro.error[[i]][h,])
+    macro.results[i,h] <- model.names[best.num]
+  }
+}
+
+@
+<<macro table best, echo = FALSE>>=
+macro.results.table <- xtable(macro.results,
+       caption="Результаты прогнозирования макроэкономических показателей")
+align(macro.results.table) <- "lXXXX"
+label(macro.results.table) <- 'tab:macro.res'
+names(macro.results.table) <- c("3 месяца", "6  месяцев", 
+                                    "12 месяцев", "24 месяца")
+@
+<<print macro table, results = 'asis', echo=FALSE>>=
+print(macro.results.table, tabular.environment = "tabularx", 
+       width = "\\textwidth",
+       caption.placement="top",
+      table.placement = "h",
+      booktabs = TRUE,
+      size = "\\renewcommand{\\arraystretch}{1.5}")
+@
+
+Так для каждой переменной из данного набора было построено несколько различных TVP-BVAR моделей, мы можем посмотреть, как соотносятся между собой ошибки прогноза моделей с разным количествам переменных и лагов. В таблице \ref{tab:macro.res.tvp} представлены модели с наименьшими ошибками, но только среди многомерных моделей. Из таблицы видно, что <<большие>> модели, в которые включалось более четырех переменных, чаще оказываются среди лучших. Еще одно важное наблюдение заключается в том, что подавляющая часть <<маленьких>> моделей в таблице была построена с 3 или 1 лагом. Модели с 6 лагами представлены в небольшом количестве, а модели с 12 лагами ни разу не показали лучших результатов. 
+<<best tvp models macro,echo = FALSE>>=
+
+macro.results.tvp <- data.frame(matrix(rep(NA, length(h.macro)*ncol(macro)), nrow = ncol(macro), ncol = length(h.macro)))
+rownames(macro.results.tvp) <- m.names
+colnames(macro.results.tvp) <- paste("h =", h.macro)
+
+for (i in 1:ncol(macro)){
+  model.names <- colnames(macro.error[[i]])[-(1:4)]
+  n <- length(model.names)
+  for (h in 1:length(h.macro)){
+    best.num <- which.min(macro.error[[i]][h,5:(4+n)])
+    macro.results.tvp[i,h] <- model.names[best.num]
+  }
+}
+
+@
+<<macro tvp table best, echo = FALSE>>=
+macro.results.tvp.table <- xtable(macro.results.tvp,
+       caption="Сравнение разных спецификаций TVP-BVAR")
+align(macro.results.tvp.table) <- "lXXXX"
+label(macro.results.tvp.table) <- 'tab:macro.res.tvp'
+names(macro.results.tvp.table) <- c("3 месяца", "6  месяцев", 
+                                    "12 месяцев", "24 месяца")
+@
+<<print macro tvp table, results = 'asis', echo=FALSE>>=
+print(macro.results.tvp.table, tabular.environment = "tabularx", 
+       width = "\\textwidth",
+       caption.placement="top",
+      table.placement = "h!",
+      booktabs = TRUE,
+      size = "\\renewcommand{\\arraystretch}{1.5}")
+@
+\subsubsection{Результаты прогнозирования финансовых данных}
+
+<<fin error preplot, echo=FALSE>>=
+#######
+for (i in 1:ncol(stocks)){
+ fin.error[[i]] <- fin.error[[i]][,-5]
+}
+########
+h.fin <- c(7, 14, 30, 180, 260)
+all.error.fin <- data.frame(matrix(rep(NA, 4), ncol=4))
+colnames(all.error.fin) <- c('horison', 'var', 'model', 'value')
+all.error.fin <- all.error.fin[-1,]
+for (i in 1:24){
+  temp <- fin.error[[i]]
+  temp$horison <- h.fin
+  temp$var <- rep(f.names[i], 5)
+  temp <- melt(temp, id.vars = c('horison', 'var'), variable.name = "model")
+  all.error.fin <- rbind(all.error.fin, temp)
+}
+@
+<<fin.error.graph, echo=FALSE, fig.width=12, fig.height=19, fig.cap='Относительные ошибки прогноза финансовых данных', fig.lp='fig:'>>=
+ggplot(all.error.fin, aes(x = horison, y = value, group = model, color = model)) + 
+     geom_point(size = 2.5) + 
+     geom_line()+
+     facet_wrap( ~ var, scales = 'free_y', ncol = 3)+
+     ylab("Ошибка относительно случайного блуждания")+
+     xlab("Горизонт прогноза")+
+     ggtitle(" ")+
+     theme(text = element_text(size=22))+
+     scale_color_discrete(breaks=c("e", "a", "f", "hybrid", "tvp"),
+                         labels=c("ETS", "ARIMA", "Theta", "Hybrid", "TVP"))
+@
+Перейдем к данным из финансовой выборки. Напомним, что всего прогнозировалось 24 временных ряда, представляющих изменение цен акций крупнейших российских компаний из 8 индустрий. На рисунке \ref{fig:fin.error.graph} представлены относительные ошибки прогноза для каждой из 24 переменных, отсортированные по отраслям. В данном случае каждая переменная участвовала только в одной TVP-BVAR модели, построенной для трех компаний одной отрасли. На графике можно видеть компании, изменение цен которых лучше всего спрогнозировала именно байесовская векторная авторегрессия с переменными коэффициентами, например, Лукойл, Газпром, М.Видео (для небольших горизонтов). А для таких компаний как Магнит, Мегафон и Ростелеком одномерные модели оказались более эффективными.  Однако, в целом, глядя на график, сложно определить фаворита. Явно видно, что во многих случаях разница в прогнозе достаточно маленькая. 
+
+Наконец, рассмотрим результаты, представленные в таблице \ref{tab:fin.res}. Как и в случае с графиком, изучая список моделей, имеющих наименьшую относительную ошибку, нельзя выявить модель, которая лучше остальных прогнозируют изменение цен акций. Тем не менее, стоит отметить,  что более чем в трети случаев многомерная модель оказалась лучше одномерных. Также можно заметить, что высокие результаты TVP-BVAR для одной компании часто означают аналогичные результаты для других компаний той же отрасли. Такой результат кажется закономерным, так как модели строились для отрасли в целом.
+
+<<best models fin,echo = FALSE>>=
+
+fin.results <- data.frame(matrix(rep(NA, length(h.fin)*ncol(stocks)), nrow = ncol(stocks), ncol= length(h.fin)))
+rownames(fin.results) <- f.names
+colnames(fin.results) <- paste("h =", h.fin)
+fmodel.names <- c('ARIMA', 'ETS', 'Theta' ,'Hybrid', 'TVP')
+for (i in 1:ncol(stocks)){
+  for (h in 1:length(h.fin)){
+    best.num <- which.min(fin.error[[i]][h,])
+    fin.results[i,h] <- fmodel.names[best.num]
+  }
+}
+
+@
+<<fin table best, echo = FALSE>>=
+fin.results.table <- xtable(fin.results,
+       caption="Результаты прогнозирования финансовых данных")
+align(fin.results.table) <- "lXXXXX"
+label(fin.results.table) <- 'tab:fin.res'
+#names(tab8) <- c("Схема взвешивания","MSE", "MAPE", "MASE")
+@
+<<print fin table, results = 'asis', echo=FALSE>>=
+print(fin.results.table, tabular.environment = "tabularx", 
+       width = "\\textwidth",
+       caption.placement="top",
+      table.placement = "h!",
+      booktabs = TRUE,
+      size = "\\renewcommand{\\arraystretch}{1.5}")
+@
+
+Однако, из графика на рисунке \ref{fig:fin.error.graph} мы знаем, что для многих компаний разница в относительной ошибке крайне незначительна. Таким образом, не стоит делать вывод, что модели, представленные в таблице, действительно обеспечивают более высокое качество прогнозов. Дело в том, что если говорить об одномерных моделях, то использование замена одних методов на другие даже для незначительного улучшения прогноза вполне оправдано, так как их оценка не требует большого количества вычислительных ресурсов. Если же рассматривать необходимость использования таких сложных методов как TVP-BVAR, стоит принимать во внимание, что оценка одной модели может занимать до нескольких часов или даже дней в зависимости от мощности используемого компьютера, а результаты часто незначительно превосходят результаты одномерных моделей. Таким образом, если стоит задача построение оперативного прогноза на ближайший период времени, стоит серьезно оценить вычислительные мощности используемого оборудования при построении таких моделей как TVP-BVAR. 
+
+\newpage

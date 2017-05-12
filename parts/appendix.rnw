@@ -1,0 +1,140 @@
+% !Rnw root = Main.Rnw
+\section*{Приложения} 
+\label{sec:app}
+\addcontentsline{toc}{section}{\nameref{sec:app}}
+\appendix
+\subsection*{А. Макроэкономические данные} 
+\label{sec:app-data}
+\addcontentsline{toc}{subsection}{\nameref{sec:app-data}}
+
+
+\begin{center*}
+\begin{table}[h!]
+\renewcommand{\arraystretch}{1.5}
+\begin{threeparttable}
+\centering
+\small
+\caption{Макроэкономические временные ряды}
+\label{table:macro}
+\begin{tabularx}{\textwidth}{lp{0.45\textwidth}p{0.15\textwidth}p{0.08\textwidth}p{0.25\textwidth}}
+\toprule
+Название                           & Описание &  Единицы измерения   &  Разность  &  Источник    \\ \midrule
+y &  Инфдекс промышленного производства &индекс (2010 = 100)    & 1 &    ФСГС  \\
+$\pi$                              & Индекс потребительских цен, изменение по отношению к прошлому году  &\%    & 0 &  ФСГС  \\
+r & Средняя за месяц межбанковская овернайт ставка &\%     &1 &   ЦБ РФ   \\
+u                       & Удельная доля безработных среди экономически активного населения &\%  & 1&    ФСГС  \\ 
+m      & Денежный аггрегат М2 &млрд. руб     & 1&ЦБ РФ        \\ 
+oil                    &  Стоимость одного баррел нефти & долл    &1& Финам\\
+$\text{e}_{doll}$ &  Номинальный обменный курс доллара &руб за долл    & 1 &  ММВБ  \\
+w      & Среднемесячная номинальная заработная плата &руб    &  1&  МЭР   \\
+rts                       & Композиторный индекс российского фондового рынка &пункты    & 1 & ЕАЭСД \\ \toprule
+\end{tabularx}
+\begin{tablenotes}
+      \footnotesize 
+      \item ФСГС --- \href{http://www.gks.ru/}{Федеральная служба государственной статистики}
+      \item ЦБ РФ --- \href{http://www.cbr.ru/}{Центральный банк Российской Федерации}
+      \item Финам --- \href{http://finam.ru/}{Инвестиционная компания <<ФИНАМ>>}
+      \item ММВБ --- \href{http://moex.com/}{Московская биржа}
+      \item МЭР --- \href{http://economy.gov.ru/}{Министерство экономического развития}
+      \item ЕАЭСД --- \href{http://sophist.hse.ru/}{Единый архив экономических и социологических данных}
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+\end{center*}
+\newpage
+
+\subsection*{B. Финансовые данные} 
+\label{sec:app-fdata}
+\addcontentsline{toc}{subsection}{\nameref{sec:app-fdata}}
+
+\begin{center*}
+\begin{table}[h!]
+\renewcommand{\arraystretch}{1.4}
+\begin{threeparttable}
+\centering
+\caption{Финансовые временные ряды}
+\label{table:fin}
+\begin{tabularx}{\textwidth}{lX}
+\toprule
+ Индустрия                                                &  Название компании    \\ \midrule
+\multirow{3}{*}{Банки и Финанасы }    &   Сбербанк     \\
+                                     &  ВТБ          \\
+                                      & Открытие        \\ \hline
+\multirow{3}{*}{Машиностроение}        & АВТОВАЗ         \\ 
+                                       &  КАМАЗ        \\ 
+                                       &  СОЛЛЕРС         \\ \hline
+\multirow{3}{*}{Металлы и Добыча}       & Норникель         \\ 
+                                       &   Полюс          \\ 
+                                       &   Северсталь         \\ \hline
+\multirow{3}{*}{Нефть и газ}        &  Роснефть        \\ 
+                                       &   Газпром          \\ 
+                                       &  Лукойл          \\ \hline
+\multirow{3}{*}{Потребительские товары и торговля}  &   Магнит          \\ 
+                                       &   Лента         \\ 
+                                       &   М.Видео       \\ \hline
+\multirow{3}{*}{Телекоммуникации, IT}   &   МТС           \\ 
+                                       & Мегафон            \\ 
+                                       &  Ростелеком         \\ \hline
+\multirow{3}{*}{Химическое производство } & Уралкалий         \\ 
+                                       &   Фосагро         \\ 
+                                       &   Акрон       \\ \hline
+\multirow{3}{*}{Электроэнергетика} &   Интер РАО       \\ 
+                                       &   РусГидро         \\ 
+                                       &   ФСК ЕЭС    \\ \bottomrule
+\end{tabularx}
+\begin{tablenotes}
+      \footnotesize 
+      \item Источник данных: Терминал Thomson Reuters
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+\end{center*}
+
+
+<<all industries, echo = FALSE>>=
+field.names <- c("Банки и Финансы", "Машиностроение", "Металлы и Добыча",
+                 "Нефть и газ","Потребительские товары","Телекоммуникации",
+                 "Химическое производство","Электроэнергетика")
+fplots1 <- vector('list', 7)
+fplots2 <- vector('list', 7)
+for (i in 1:7){
+  df.raw <- data.frame(stocks.raw[-1, (3*i+1):(3*i+3)])
+  colnames(df.raw) <- f.names[(3*i+1):(3*i+3)]
+  df.raw$date <- index(stocks.zoo)
+  df.raw.melt = melt(df.raw, id.vars = 'date')
+  fplots1[[i]] <- ggplot(df.raw.melt, aes(x = date, y = value)) +
+                  geom_line() +
+                  facet_wrap(~ variable, scales = 'free_y', ncol = 1)+
+                  ylab("Цена")+
+                  xlab(" ")+
+                  theme(text = element_text(size=14))+
+                  ggtitle(field.names[i+1])
+
+
+  df <- data.frame(stocks[, (3*i+1):(3*i+3)])
+  colnames(df) <- f.names[(3*i+1):(3*i+3)]
+  df$date <- index(stocks.zoo)
+  df.melt <-  melt(df, id.vars = 'date')
+  fplots2[[i]] <- ggplot(df.melt, aes(x = date, y = value)) +
+                  geom_line() +
+                  facet_wrap(~ variable, scales = 'free_y', ncol = 1)+
+                  ylab("Модифицированная цена")+
+                  xlab(" ")+
+                  theme(text = element_text(size=14))
+}
+
+@
+<<aindustry.plots, echo = FALSE, fig.height=20, fig.width=12, fig.pos='t'>>=
+grid.arrange(fplots1[[1]],fplots2[[1]],fplots1[[2]],fplots2[[2]],fplots1[[3]],
+             fplots2[[3]],fplots1[[4]],fplots2[[4]],ncol = 2, nrow = 4)
+@
+<<bindustry.plots, echo = FALSE, fig.height=15, fig.width=12>>=
+grid.arrange(fplots1[[5]],fplots2[[5]],fplots1[[6]],fplots2[[6]],fplots1[[7]],
+             fplots2[[7]],ncol = 2, nrow = 3)
+@
+
+\subsection*{C. Расчеты} 
+\label{sec:calc}
+\addcontentsline{toc}{subsection}{\nameref{sec:calc}}
+
+Все расчеты, проводившиеся в рамках данной работы, доступны в \href{https://github.com/AKuzina/TVP_BVAR}{репозитории на GitHub}.

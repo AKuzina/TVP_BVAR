@@ -1,6 +1,6 @@
 \documentclass[a4paper, 14pt]{extarticle}
 
-\input{parts/setup}  
+\input{parts/00-setup}  
 
 \begin{document}
 <<echo=FALSE, warning=FALSE, message=FALSE, include=FALSE>>=
@@ -22,9 +22,69 @@ knit_theme$set("moe")
 
 @
 
-%\input{parts/title}
-
-<<test, child='parts/Data.Rnw'>>=
+<<load packages, echo=FALSE, warning=FALSE, message=FALSE>>=
+library(sophisthse)
+library(forecast)
+library(dplyr)
+library(ggplot2)
+library(reshape2)
+library(grid)
+library(gridExtra)
+library(bvarsv)
+library(forecastHybrid)
+library(Rtsne)
+library(coda)
+library(xtable)
 @
+
+%%%%%%%%%%%%% Титульный лист %%%%%%%%%%%%%%%%%%%%%
+
+\input{parts/01-title}
+
+
+%%%%%%%%%%%% Оглавление %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\tableofcontents
+\newpage
+
+
+%%%%%%%%%%%%% Вступление %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\input{parts/11-intro}
+\newpage
+
+%%%%%%%%%%%% Обзор литературы %%%%%%%%%%%%%%%%%%%%%%%%%
+
+\input{parts/12-literature_review}
+\newpage
+
+%%%%%%%%%%%% Теоритическая часть %%%%%%%%%%%%%%%%%%%%%%
+
+\section{Теоретическая часть}
+\input{parts/21-univariate}
+\input{parts/22-multivariate}
+\newpage
+
+%%%%%%%%%%%% Практическая часть %%%%%%%%%%%%%%%%%%%%%%
+
+\section{Практическая часть}
+<<child='parts/31-data.Rnw'>>=
+@
+<<child='parts/32-methodology.Rnw'>>=
+@
+<<child='parts/33-results.Rnw',>>=
+@
+
+
+%%%%%%%%%%% Заключение %%%%%%%%%%%%%%%%%%%%%%%%%%
+\input{parts/41-conclusion}
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+<<child='parts/appendix.Rnw', cache=TRUE>>=
+@
+
+
+
+%%%%%%%%%%%%%%%%%%% Список литературы %%%%%%%%%%%%%%%%%%%%%%%%%
+\input{parts/bibliography}
 
 \end{document}
