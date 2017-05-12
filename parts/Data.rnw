@@ -1,8 +1,0 @@
-% !Rnw root = Main.Rnw
-
-\section{Analysis}
-This is the analysis.
-
-<<analysis>>=
-summary(cars)
-@
