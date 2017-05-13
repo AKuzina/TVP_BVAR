@@ -187,6 +187,7 @@ f1 <- ggplot(df.raw.melt, aes(x = date, y = value)) +
     geom_line() +
     facet_wrap(~ variable, scales = 'free_y', ncol = 1)+
     ylab("Цена")+
+    xlab("Дата")+
     theme(axis.title.x = element_text(size=14),
           axis.title.y = element_text(size=14))
 
@@ -199,6 +200,7 @@ f2 <- ggplot(df.melt, aes(x = date, y = value)) +
     geom_line() +
     facet_wrap(~ variable, scales = 'free_y', ncol = 1)+
     ylab("Модифицированная цена")+
+    xlab("Дата")+
     theme(axis.title.x = element_text(size=14),
           axis.title.y = element_text(size=14))
 @

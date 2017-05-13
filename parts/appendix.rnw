@@ -82,8 +82,7 @@ rts                       & Композиторный индекс россий
                                        &   РусГидро         \\ 
                                        &   ФСК ЕЭС    \\ \bottomrule
 \end{tabularx}
-\begin{tablenotes}
-      \footnotesize 
+\begin{tablenotes} 
       \item Источник данных: Терминал Thomson Reuters
 \end{tablenotes}
 \end{threeparttable}
